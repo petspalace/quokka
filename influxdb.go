@@ -48,6 +48,7 @@ type InfluxMessage struct {
 	Measurement string
 	TagSet      map[string]string
 	FieldSet    map[string]string
+	Timestamp   string
 }
 
 /*

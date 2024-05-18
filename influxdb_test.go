@@ -25,6 +25,7 @@ func TestNewInflux(t *testing.T) {
 				FieldSet: map[string]string{
 					"field": "field-value",
 				},
+				Timestamp: "",
 			},
 			err: nil,
 		},
