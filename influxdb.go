@@ -53,8 +53,7 @@ type InfluxMessage struct {
 
 /*
 A naive way to parse an InfluxDB Line Protocol message into a struct. This assumes that a tag is always present in the
-
-	message while it might not be. It also assumes there are always fields.
+message while it might not be. It also assumes there are always fields.
 */
 func NewInflux(data string) (*InfluxMessage, error) {
 	i := InfluxMessage{}
@@ -63,6 +62,10 @@ func NewInflux(data string) (*InfluxMessage, error) {
 
 	if !split {
 		return nil, errors.New(fmt.Sprintf("Did not find ',' in message '%s'", data))
+	}
+
+	if isReserved(name) {
+		return nil, errors.New(fmt.Sprintf("Measurement %v starts with `_` this is not allowed.", name))
 	}
 
 	i.Measurement = name
@@ -74,13 +77,34 @@ func NewInflux(data string) (*InfluxMessage, error) {
 
 	for _, tag := range strings.Split(tags, ",") {
 		k, v, _ := strings.Cut(tag, "=")
+
+		if isReserved(k) {
+			return nil, errors.New(fmt.Sprintf("Tag key %v starts with `_` this is not allowed.", k))
+		}
+
 		i.TagSet[k] = v
 	}
 
 	for _, field := range strings.Split(fields, ",") {
 		k, v, _ := strings.Cut(field, "=")
+
+		if isReserved(k) {
+			return nil, errors.New(fmt.Sprintf("Field key %v starts with `_` this is not allowed.", k))
+		}
+
 		i.FieldSet[k] = v
 	}
 
 	return &i, nil
+}
+
+/*
+Determine if haystack is reserved, according to the InfluxDB Line Protocol documentation the following
+items are reserved:
+
+> Measurement names, tag keys, and field keys cannot begin with an underscore _. The _ namespace is reserved for
+> InfluxDB system use.
+*/
+func isReserved(data string) bool {
+	return strings.HasPrefix(data, "_")
 }

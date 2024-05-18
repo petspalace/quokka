@@ -1,6 +1,7 @@
 package quokka_test
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 
@@ -29,13 +30,23 @@ func TestNewInflux(t *testing.T) {
 			},
 			err: nil,
 		},
+		{
+			input: "temperature,_tag=tag-value field=field-value",
+			want:  nil,
+			err:   errors.New("Tag key _tag starts with `_` this is not allowed."),
+		},
+		{
+			input: "temperature,tag=tag-value _field=field-value",
+			want:  nil,
+			err:   errors.New("Field key _field starts with `_` this is not allowed."),
+		},
 	}
 
 	for _, tc := range tests {
 		res, err := quokka.NewInflux(tc.input)
 
-		if err != tc.err {
-			t.Fatalf("expected err: %v got: %v", tc.want, err)
+		if !reflect.DeepEqual(err, tc.err) {
+			t.Fatalf("expected err: %v got: %v", tc.err, err)
 		}
 
 		if !reflect.DeepEqual(tc.want, res) {
