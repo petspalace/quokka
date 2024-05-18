@@ -33,12 +33,12 @@ func TestNewInflux(t *testing.T) {
 		{
 			input: "temperature,_tag=tag-value field=field-value",
 			want:  nil,
-			err:   errors.New("Tag key _tag starts with `_` this is not allowed."),
+			err:   errors.New("Key _tag starts with `_` this is not allowed."),
 		},
 		{
 			input: "temperature,tag=tag-value _field=field-value",
 			want:  nil,
-			err:   errors.New("Field key _field starts with `_` this is not allowed."),
+			err:   errors.New("Key _field starts with `_` this is not allowed."),
 		},
 	}
 

@@ -70,24 +70,14 @@ func NewInflux(data string) (*InfluxDataPoint, error) {
 
 	tags, fields, _ := strings.Cut(rest, " ")
 
-	for _, tag := range strings.Split(tags, ",") {
-		k, v, _ := strings.Cut(tag, "=")
+	var err error
 
-		if isReserved(k) {
-			return nil, errors.New(fmt.Sprintf("Tag key %v starts with `_` this is not allowed.", k))
-		}
-
-		point.TagSet[k] = v
+	if point.TagSet, err = parseSetPart(tags); err != nil {
+		return nil, err
 	}
 
-	for _, field := range strings.Split(fields, ",") {
-		k, v, _ := strings.Cut(field, "=")
-
-		if isReserved(k) {
-			return nil, errors.New(fmt.Sprintf("Field key %v starts with `_` this is not allowed.", k))
-		}
-
-		point.FieldSet[k] = v
+	if point.FieldSet, err = parseSetPart(fields); err != nil {
+		return nil, err
 	}
 
 	return &point, nil
@@ -102,4 +92,20 @@ items are reserved:
 */
 func isReserved(data string) bool {
 	return strings.HasPrefix(data, "_")
+}
+
+func parseSetPart(data string) (map[string]string, error) {
+	set := make(FieldSet)
+
+	for _, field := range strings.Split(data, ",") {
+		k, v, _ := strings.Cut(field, "=")
+
+		if isReserved(k) {
+			return nil, errors.New(fmt.Sprintf("Key %v starts with `_` this is not allowed.", k))
+		}
+
+		set[k] = v
+	}
+
+	return set, nil
 }
