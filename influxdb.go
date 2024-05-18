@@ -1,5 +1,5 @@
 /* Small Golang library to go to and from the
- * [InfluxDB Line Format](https://docs.influxdata.com/influxdb/v2/reference/syntax/line-protocol/).
+ * [InfluxDB Line Protocol](https://docs.influxdata.com/influxdb/v2/reference/syntax/line-protocol/).
  *
  * This program will exit on any error, so be sure to run it in an init system
  * or other process manager.
@@ -43,7 +43,7 @@ import (
 	"strings"
 )
 
-/* Describes an InfluxDB Line Format message */
+/* Describes an InfluxDB Line Protocol message */
 type InfluxMessage struct {
 	Measurement string
 	TagSet      map[string]string
@@ -51,7 +51,7 @@ type InfluxMessage struct {
 }
 
 /*
-A naive way to parse an InfluxDB Line Format message into a struct. This assumes that a tag is always present in the
+A naive way to parse an InfluxDB Line Protocol message into a struct. This assumes that a tag is always present in the
 
 	message while it might not be. It also assumes there are always fields.
 */
