@@ -1,8 +1,8 @@
 package quokka_test
 
 import (
+	"reflect"
 	"testing"
-    "reflect"
 
 	"github.com/petspalace/quokka"
 )
@@ -10,35 +10,35 @@ import (
 func TestNewInflux(t *testing.T) {
 	type test struct {
 		input string
-		want *quokka.InfluxMessage
-        err error
+		want  *quokka.InfluxMessage
+		err   error
 	}
 
 	tests := []test{
 		{
 			input: "temperature,tag=tag-value field=field-value",
 			want: &quokka.InfluxMessage{
-				Name: "temperature",
-				Tags: map[string]string{
+				Measurement: "temperature",
+				TagSet: map[string]string{
 					"tag": "tag-value",
 				},
-				Fields: map[string]string{
+				FieldSet: map[string]string{
 					"field": "field-value",
 				},
 			},
-            err: nil,
+			err: nil,
 		},
 	}
 
-    for _, tc := range tests {
-        res, err := quokka.NewInflux(tc.input)
+	for _, tc := range tests {
+		res, err := quokka.NewInflux(tc.input)
 
-        if err != tc.err {
-            t.Fatalf("expected err: %v got: %v", tc.want, err)
-        }
+		if err != tc.err {
+			t.Fatalf("expected err: %v got: %v", tc.want, err)
+		}
 
-        if !reflect.DeepEqual(tc.want, res) {
-            t.Fatalf("expected: %v got: %v", tc.want, res)
-        }
-    }
+		if !reflect.DeepEqual(tc.want, res) {
+			t.Fatalf("expected: %v got: %v", tc.want, res)
+		}
+	}
 }

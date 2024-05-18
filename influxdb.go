@@ -45,9 +45,9 @@ import (
 
 /* Describes an InfluxDB Line Format message */
 type InfluxMessage struct {
-	Name   string
-	Tags   map[string]string
-	Fields map[string]string
+	Measurement string
+	TagSet      map[string]string
+	FieldSet    map[string]string
 }
 
 /*
@@ -64,21 +64,21 @@ func NewInflux(data string) (*InfluxMessage, error) {
 		return nil, errors.New(fmt.Sprintf("Did not find ',' in message '%s'", data))
 	}
 
-	i.Name = name
+	i.Measurement = name
 
-	i.Tags = make(map[string]string)
-	i.Fields = make(map[string]string)
+	i.TagSet = make(map[string]string)
+	i.FieldSet = make(map[string]string)
 
 	tags, fields, _ := strings.Cut(rest, " ")
 
 	for _, tag := range strings.Split(tags, ",") {
 		k, v, _ := strings.Cut(tag, "=")
-		i.Tags[k] = v
+		i.TagSet[k] = v
 	}
 
 	for _, field := range strings.Split(fields, ",") {
 		k, v, _ := strings.Cut(field, "=")
-		i.Fields[k] = v
+		i.FieldSet[k] = v
 	}
 
 	return &i, nil
