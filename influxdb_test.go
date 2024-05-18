@@ -11,14 +11,14 @@ import (
 func TestNewInflux(t *testing.T) {
 	type test struct {
 		input string
-		want  *quokka.InfluxMessage
+		want  *quokka.InfluxDataPoint
 		err   error
 	}
 
 	tests := []test{
 		{
 			input: "temperature,tag=tag-value field=field-value",
-			want: &quokka.InfluxMessage{
+			want: &quokka.InfluxDataPoint{
 				Measurement: "temperature",
 				TagSet: map[string]string{
 					"tag": "tag-value",

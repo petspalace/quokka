@@ -36,11 +36,14 @@ import (
 	"strings"
 )
 
+type TagSet map[string]string
+type FieldSet map[string]string
+
 /* Describes an InfluxDB Line Protocol message */
-type InfluxMessage struct {
+type InfluxDataPoint struct {
 	Measurement string
-	TagSet      map[string]string
-	FieldSet    map[string]string
+	TagSet      TagSet
+	FieldSet    FieldSet
 	Timestamp   string
 }
 
@@ -48,8 +51,8 @@ type InfluxMessage struct {
 A naive way to parse an InfluxDB Line Protocol message into a struct. This assumes that a tag is always present in the
 message while it might not be. It also assumes there are always fields.
 */
-func NewInflux(data string) (*InfluxMessage, error) {
-	i := InfluxMessage{}
+func NewInflux(data string) (*InfluxDataPoint, error) {
+	point := InfluxDataPoint{}
 
 	name, rest, split := strings.Cut(data, ",")
 
@@ -61,10 +64,9 @@ func NewInflux(data string) (*InfluxMessage, error) {
 		return nil, errors.New(fmt.Sprintf("Measurement %v starts with `_` this is not allowed.", name))
 	}
 
-	i.Measurement = name
-
-	i.TagSet = make(map[string]string)
-	i.FieldSet = make(map[string]string)
+	point.Measurement = name
+	point.TagSet = make(map[string]string)
+	point.FieldSet = make(map[string]string)
 
 	tags, fields, _ := strings.Cut(rest, " ")
 
@@ -75,7 +77,7 @@ func NewInflux(data string) (*InfluxMessage, error) {
 			return nil, errors.New(fmt.Sprintf("Tag key %v starts with `_` this is not allowed.", k))
 		}
 
-		i.TagSet[k] = v
+		point.TagSet[k] = v
 	}
 
 	for _, field := range strings.Split(fields, ",") {
@@ -85,10 +87,10 @@ func NewInflux(data string) (*InfluxMessage, error) {
 			return nil, errors.New(fmt.Sprintf("Field key %v starts with `_` this is not allowed.", k))
 		}
 
-		i.FieldSet[k] = v
+		point.FieldSet[k] = v
 	}
 
-	return &i, nil
+	return &point, nil
 }
 
 /*
