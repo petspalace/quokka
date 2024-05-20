@@ -36,14 +36,13 @@ import (
 	"strings"
 )
 
-type TagSet map[string]string
-type FieldSet map[string]string
+type InfluxSet map[string]string
 
 /* Describes an InfluxDB Line Protocol message */
 type InfluxDataPoint struct {
 	Measurement string
-	TagSet      TagSet
-	FieldSet    FieldSet
+	TagSet      InfluxSet
+	FieldSet    InfluxSet
 	Timestamp   string
 }
 
@@ -60,23 +59,23 @@ func NewInflux(data string) (*InfluxDataPoint, error) {
 		return nil, errors.New(fmt.Sprintf("Did not find ',' in message '%s'", data))
 	}
 
-	if isReserved(name) {
+	if InfluxIsReserved(name) {
 		return nil, errors.New(fmt.Sprintf("Measurement %v starts with `_` this is not allowed.", name))
 	}
 
 	point.Measurement = name
-	point.TagSet = make(map[string]string)
-	point.FieldSet = make(map[string]string)
+	point.TagSet = make(InfluxSet)
+	point.FieldSet = make(InfluxSet)
 
 	tags, fields, _ := strings.Cut(rest, " ")
 
 	var err error
 
-	if point.TagSet, err = parseSetPart(tags); err != nil {
+	if point.TagSet, err = InfluxParseSetPart(tags); err != nil {
 		return nil, err
 	}
 
-	if point.FieldSet, err = parseSetPart(fields); err != nil {
+	if point.FieldSet, err = InfluxParseSetPart(fields); err != nil {
 		return nil, err
 	}
 
@@ -90,17 +89,17 @@ items are reserved:
 > Measurement names, tag keys, and field keys cannot begin with an underscore _. The _ namespace is reserved for
 > InfluxDB system use.
 */
-func isReserved(data string) bool {
+func InfluxIsReserved(data string) bool {
 	return strings.HasPrefix(data, "_")
 }
 
-func parseSetPart(data string) (map[string]string, error) {
-	set := make(FieldSet)
+func InfluxParseSetPart(data string) (InfluxSet, error) {
+	set := make(InfluxSet)
 
 	for _, field := range strings.Split(data, ",") {
 		k, v, _ := strings.Cut(field, "=")
 
-		if isReserved(k) {
+		if InfluxIsReserved(k) {
 			return nil, errors.New(fmt.Sprintf("Key %v starts with `_` this is not allowed.", k))
 		}
 

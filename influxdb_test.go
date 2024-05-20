@@ -54,3 +54,33 @@ func TestNewInflux(t *testing.T) {
 		}
 	}
 }
+
+func TestInfluxParseSetPart(t *testing.T) {
+	type test struct {
+		input string
+		want  quokka.InfluxSet
+		err   error
+	}
+
+	tests := []test{
+		{
+			input: "tag=tag-value",
+			want: quokka.InfluxSet{
+				"tag": "tag-value",
+			},
+			err: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		res, err := quokka.InfluxParseSetPart(tc.input)
+
+		if !reflect.DeepEqual(err, tc.err) {
+			t.Fatalf("expected err: %v got: %v", tc.err, err)
+		}
+
+		if !reflect.DeepEqual(tc.want, res) {
+			t.Fatalf("expected: %v got: %v", tc.want, res)
+		}
+	}
+}
