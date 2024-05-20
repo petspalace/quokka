@@ -63,12 +63,45 @@ func TestInfluxParseSetPart(t *testing.T) {
 	}
 
 	tests := []test{
+		// Happy
 		{
 			input: "tag=tag-value",
 			want: quokka.InfluxSet{
 				"tag": "tag-value",
 			},
 			err: nil,
+		},
+		{
+			input: "tag0=tag-value,tag1=tag-value",
+			want: quokka.InfluxSet{
+				"tag0": "tag-value",
+				"tag1": "tag-value",
+			},
+			err: nil,
+		},
+
+		// Reserved keys
+		{
+			input: "_tag0=tag-value",
+			want:  nil,
+			err:   errors.New("Key _tag0 starts with `_` this is not allowed."),
+		},
+		{
+			input: "tag0=tag-value,_tag0=tag-value",
+			want:  nil,
+			err:   errors.New("Key _tag0 starts with `_` this is not allowed."),
+		},
+
+		// Duplicate keys
+		{
+			input: "tag0=tag-value,tag0=tag-value",
+			want:  nil,
+			err:   errors.New("Key tag0 was already in set this is not allowed."),
+		},
+		{
+			input: "tag0=tag-value,tag1=tag-value,tag0=tag-value",
+			want:  nil,
+			err:   errors.New("Key tag0 was already in set this is not allowed."),
 		},
 	}
 

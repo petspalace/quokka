@@ -93,11 +93,21 @@ func InfluxIsReserved(data string) bool {
 	return strings.HasPrefix(data, "_")
 }
 
+/*
+Parsing of InfluxDB Line Protocol sets which are really maps.
+
+The InfluxDB Line Protocol documentation does not state how to handle duplicate keys in maps. `quokka` is strict here
+and will error on duplicate keys.
+*/
 func InfluxParseSetPart(data string) (InfluxSet, error) {
 	set := make(InfluxSet)
 
 	for _, field := range strings.Split(data, ",") {
 		k, v, _ := strings.Cut(field, "=")
+
+		if _, d := set[k]; d {
+			return nil, errors.New(fmt.Sprintf("Key %v was already in set this is not allowed.", k))
+		}
 
 		if InfluxIsReserved(k) {
 			return nil, errors.New(fmt.Sprintf("Key %v starts with `_` this is not allowed.", k))
