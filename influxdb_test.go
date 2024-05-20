@@ -16,6 +16,7 @@ func TestNewInflux(t *testing.T) {
 	}
 
 	tests := []test{
+		// Happy
 		{
 			input: "temperature,tag=tag-value field=field-value",
 			want: &quokka.InfluxDataPoint{
@@ -30,11 +31,15 @@ func TestNewInflux(t *testing.T) {
 			},
 			err: nil,
 		},
+
+		// Reserved key in tags, further tests in `TestInfluxParseSetPart`
 		{
 			input: "temperature,_tag=tag-value field=field-value",
 			want:  nil,
 			err:   errors.New("Key _tag starts with `_` this is not allowed."),
 		},
+
+		// Reserved key in fields, further tests in `TestInfluxParseSetPart`
 		{
 			input: "temperature,tag=tag-value _field=field-value",
 			want:  nil,
